@@ -69,7 +69,7 @@ create table pokemon
     datacaptura date, 
     localcaptura varchar(45) not null,
     pokebola varchar(45) default 'Normal'not null,
-    sexo char(1) default null,
+    sexo char(1),
     apelido varchar(45),
     constraint pk_pokemon primary key (idpokemon),
     constraint fk_pokecpf foreign key (fk_pokecpf) references treinador (pokecpf),
