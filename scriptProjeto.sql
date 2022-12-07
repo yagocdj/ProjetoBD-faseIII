@@ -52,11 +52,9 @@ create table batalha
     idbatalha int not null,
     idtreinador1 int not null,
     idtreinador2 int not null,
-    vencedor int,
     constraint pk_batalha primary key(idbatalha),
     constraint fk_treinador1 foreign key (idtreinador1) references treinador (pokecpf),
-    constraint fk_treinador2 foreign key (idtreinador2) references treinador (pokecpf),
-    constraint chk_vencedor check((vencedor in (idtreinador1, idtreinador2)) or (vencedor is null))
+    constraint fk_treinador2 foreign key (idtreinador2) references treinador (pokecpf)
 );
 
 /* valor default só cabe para colunas opicionais */
@@ -91,7 +89,7 @@ create table golpe
     idgolpe int not null,
     nome varchar(45) not null,
     poder int not null,
-    precisao decimal(3,1) not null,
+    precisao decimal(4,1) not null,
     constraint fk_idtipo foreign key (fk_idtipo) references tipo (idtipo),
     constraint pk_idgolpe primary key (idgolpe),
     constraint chk_precisao check (0 < precisao <= 100) /* 0 < precisao <= 100 */
@@ -133,12 +131,12 @@ insert into lider values (6, 'Sabrinna', 'f', '1997-04-13', '2007-04-13', 'Psíq
 insert into lider values (7, 'Blaine', 'm', '1997-03-29', '2007-03-29', 'Fogo', 7, 'Ilha Cinnabar', 'Show de trivia');
 insert into lider values (8, 'Giovanni', 'm', '1997-04-13', '2007-04-13', 'Terra', 8, 'Viridian City', 'Piscina olímpica');
 
-/* Inserção de dados na tabela batalha:(idbatalha,fk_idtreinador1,fk_treinador2,vencededor) */
-insert into batalha values (1, 1, 2, 2);
-insert into batalha values (2, 1, 3, 1);
-insert into batalha values (3, 1, 2, null);
-insert into batalha values (4, 3, 2, 2);
-insert into batalha values (5, 9, 5, 5);
+/* Inserção de dados na tabela batalha:(idbatalha,fk_idtreinador1,fk_treinador2) */
+insert into batalha values (1, 1, 2);
+insert into batalha values (2, 1, 3);
+insert into batalha values (3, 1, 2);
+insert into batalha values (4, 3, 2);
+insert into batalha values (5, 9, 5);
 
 /* Inserção de dados na tabela desafio */
 insert into desafio values (1, 1, 1, 29, 3, 1999, null, null);
@@ -175,8 +173,11 @@ insert into pokemon values (2, 11, 'Pidgey', '2002-01-14', 'Rota 3', 'Normal', '
 insert into pokemon values (12, 12, "Butterfree", "2022-11-13", "Atrás do armário", "Master ball", "f", "Sem manteiga");
 insert into pokemon values (94, 11, "Gengar", "2022-12-03", "Torre de Lavender","Bola mestra", "f", "ValterZap");
 insert into pokemon values (121, 13, "Starmie", "2012-01-21", "Floresta de Viridian", "Ultra bola", null, "Jubileu");
-insert into pokemon values (135, 10, "Jolteon", "2000-06-20", "Ilha de Cinnabar", "Bola pesada", "m", null);
+insert into pokemon values (135, 10, "Jolteon", "2000-06-20", "Ilha Cinnabar", "Bola pesada", "m", null);
 insert into pokemon values (13, 13, "Butterfree", "2022-11-14", "Rota 1", "Pokeball", "m", "Brobuleta");
+insert into pokemon values (3, 10, "Charmander", "2022-12-25", "Ilha Cinnabar", "Pokeball", "f", "Charmie");
+insert into pokemon values (4, 13, "Charmeleon", "2022-9-9", "Ilha Cinnabar", "Great ball", "m", "Leonidas");
+insert into pokemon values (5, 11, "Charizard", "2022-4-4", "Ilha Cinnabar", "Ultraball", "m", "Zagreu");
 
 /* Inserção de dados na tabela Pokemon possui tipo: (fk_tipo,fk_idpokemon) */
 insert into pokemon_possui_tipo values(10,1);
@@ -187,17 +188,21 @@ insert into pokemon_possui_tipo values(4,94);
 insert into pokemon_possui_tipo values(11,121);
 insert into pokemon_possui_tipo values(14,121);
 insert into pokemon_possui_tipo values(13,135);
+insert into pokemon_possui_tipo values(10,3);
+insert into pokemon_possui_tipo values(10,4);
+insert into pokemon_possui_tipo values(10,5);
+insert into pokemon_possui_tipo values(3,5);
 
 /* Inserção de dados na tabela Golpe: (fk_idtipo, idgolpe, nome, poder, precisao) */
 insert into golpe values(1, 1, "Investida", 35, 95.0);
 insert into golpe values(2, 5, "Fly", 90, 95.0);
-insert into golpe values(5, 2, "Dig", 80, 99.9);
-insert into golpe values(5, 3, "Ataque de Areia", 0, 99.9);
-insert into golpe values(10, 6, "Lança Chamas", 90, 99.9);
-insert into golpe values(5, 4, "Terremoto", 100, 99.9);
-insert into golpe values(10, 7, "Soco de fogo", 75, 99.9);
-insert into golpe values(13, 8, "Canhão Zap", 120, 99.9);
-insert into golpe values(17, 9, "Mordida", 60, 99.9);
+insert into golpe values(5, 2, "Dig", 80, 100.0);
+insert into golpe values(5, 3, "Ataque de Areia", 0, 100.0);
+insert into golpe values(10, 6, "Lança Chamas", 90, 100.0);
+insert into golpe values(5, 4, "Terremoto", 100, 100.0);
+insert into golpe values(10, 7, "Soco de fogo", 75, 100.0);
+insert into golpe values(13, 8, "Canhão Zap", 120, 100.0);
+insert into golpe values(17, 9, "Mordida", 60, 100.0);
 
 /* Exibir a tabela desafio com os nomes do líder desafiado e treinador desafiante, ordenados pelo líder */
 select d.iddesafio as ID, l.nome as Líder, t.nome as Treinador, d.dia as Dia, d.mes as Mês, d.ano as Ano, d.nomeinsignia as Insígnia
@@ -213,11 +218,12 @@ where year(datanascimento)
 between 1980 and 2005;
 
 /* Exibir o nome do tipo de pokémon cuja média do poder de golpe esteja entre 70.0 e 100.0 */
+/*
 select t.nome as "Tipo", avg(g.poder) as "Poder médio"
 from tipo t
 join golpe g on g.fk_idtipo = t.idtipo
 where "Poder médio" between 70.0 and 100.0
-group by t.idtipo;
+group by t.idtipo; */
 
 select t.nome as Tipo, avg(g.poder) as Poder
 from golpe g
@@ -231,9 +237,9 @@ from pokemon_possui_tipo pt
 join tipo t on pt.fk_tipo = t.idtipo
 join pokemon p on pt.fk_idpokemon = p.idpokemon;
 
-/* Exibir pokemons que começam com 'pika' */
+/* Exibir pokemons que começam com 'Char' */
 select * from pokemon
-having especie like 'pika%';
+having especie like 'Char%';
 
 /* Exibir a quantidade de tipos de cada pokemon e seus apelidos */
 select p.especie as Pokémon, p.apelido as Nome, count(distinct pt.fk_tipo) as Tipos
