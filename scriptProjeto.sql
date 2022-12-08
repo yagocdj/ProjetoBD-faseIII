@@ -8,9 +8,11 @@ create table treinador
     nome varchar(45) not null,
     sexo char(1),
     datanascimento date not null,
-    datacomeco date,
+    datacomeco date default (sysdate()) not null,
     constraint pk_pokecpf primary key (pokecpf),
-    constraint chk_gender_t check (sexo in ('m','f'))
+    constraint chk_gender_t check (sexo in ('m','f')),
+    constraint chk_datanasc_t check (datanascimento <= sysdate()),
+    constraint chk_datacomeco_t check (datanascimento <= datacomeco and datacomeco <= sysdate())
 );
 
 create table lider
@@ -19,14 +21,15 @@ create table lider
     nome varchar(45) not null,
     sexo char(1),
     datanascimento date not null,
-    datacomeco date not null,
+    datacomeco date default (sysdate()) not null,
     especializao varchar(45) not null,
     pokecnpj int not null,
     endereco varchar(45) not null,
     tema varchar(45) not null,
     constraint pk_pokecpf primary key (pokecpf),
     constraint chk_gender_l check (sexo in ('m','f')),
-    /*constraint chk_datanasc_l check (datanascimento <= now()),*/
+    constraint chk_datanasc_l check (datanascimento <= sysdate()),
+    constraint chk_datacomeco_l check (datanascimento <= datacomeco and datacomeco <= sysdate()),
     constraint ak_pokecnpj unique (pokecnpj),
     constraint ak_endereco unique (endereco)
 );
@@ -45,6 +48,7 @@ create table desafio
     constraint fk_lider foreign key (idlider) references lider (pokecpf),
     constraint fk_treinador foreign key (idtreinador) references treinador (pokecpf),
     constraint chk_insignia check ((idinsignia is not null and nomeinsignia is not null) or (idinsignia is null and nomeinsignia is null))
+    #constraint ak_idinsignia unique (idinsigia)
 );
 
 create table batalha
@@ -64,15 +68,15 @@ create table pokemon
     idpokemon int not null,
     fk_pokecpf int not null,
     especie varchar(45) not null,
-    datacaptura date, 
+    datacaptura date default (sysdate()), 
     localcaptura varchar(45) not null,
-    pokebola varchar(45) default 'Normal'not null,
+    pokebola varchar(45) default 'Normal' not null,
     sexo char(1),
     apelido varchar(45),
     constraint pk_pokemon primary key (idpokemon),
     constraint fk_pokecpf foreign key (fk_pokecpf) references treinador (pokecpf),
-    constraint chk_sexo check (sexo in ('m','f'))
-    /*constraint chk_data_cap check (datacaptura <= today())*/
+    constraint chk_sexo check (sexo in ('m','f')),
+    constraint chk_data_cap check (datacaptura <= sysdate())
 );
 
 /* DEFAULT CURRENT_TIMESTAMP GETDATE CURDATE*/
@@ -175,7 +179,7 @@ insert into pokemon values (94, 11, "Gengar", "2022-12-03", "Torre de Lavender",
 insert into pokemon values (121, 13, "Starmie", "2012-01-21", "Floresta de Viridian", "Ultra bola", null, "Jubileu");
 insert into pokemon values (135, 10, "Jolteon", "2000-06-20", "Ilha Cinnabar", "Bola pesada", "m", null);
 insert into pokemon values (13, 13, "Butterfree", "2022-11-14", "Rota 1", "Pokeball", "m", "Brobuleta");
-insert into pokemon values (3, 10, "Charmander", "2022-12-25", "Ilha Cinnabar", "Pokeball", "f", "Charmie");
+insert into pokemon values (3, 10, "Charmander", "2022-12-5", "Ilha Cinnabar", "Pokeball", "f", "Charmie");
 insert into pokemon values (4, 13, "Charmeleon", "2022-9-9", "Ilha Cinnabar", "Great ball", "m", "Leonidas");
 insert into pokemon values (5, 11, "Charizard", "2022-4-4", "Ilha Cinnabar", "Ultraball", "m", "Zagreu");
 
