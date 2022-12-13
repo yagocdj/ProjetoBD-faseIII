@@ -48,7 +48,7 @@ create table desafio
     constraint fk_lider foreign key (idlider) references lider (pokecpf),
     constraint fk_treinador foreign key (idtreinador) references treinador (pokecpf),
     constraint chk_insignia check ((idinsignia is not null and nomeinsignia is not null) or (idinsignia is null and nomeinsignia is null))
-    #constraint ak_idinsignia unique (idinsigia)
+    constraint ak_idinsignia unique (idinsignia)
 );
 
 create table batalha
