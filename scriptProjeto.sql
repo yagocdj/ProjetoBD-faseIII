@@ -8,7 +8,7 @@ create table treinador
     nome varchar(45) not null,
     sexo char(1),
     datanascimento date not null,
-    datacomeco date default (sysdate()) not null,
+    datacomeco date default (sysdate()),
     constraint pk_pokecpf primary key (pokecpf),
     constraint chk_gender_t check (sexo in ('m','f')),
     constraint chk_datanasc_t check (datanascimento <= sysdate()),
@@ -42,12 +42,12 @@ create table desafio
     dia int not null,
     mes int not null,
     ano int not null,
-    idinsignia int null,
-    nomeinsignia varchar(25) null,
+    idinsignia int,
+    nomeinsignia varchar(25),
     constraint pk_desafio primary key (iddesafio),
     constraint fk_lider foreign key (idlider) references lider (pokecpf),
     constraint fk_treinador foreign key (idtreinador) references treinador (pokecpf),
-    constraint chk_insignia check ((idinsignia is not null and nomeinsignia is not null) or (idinsignia is null and nomeinsignia is null))
+    constraint chk_insignia check ((idinsignia is not null and nomeinsignia is not null) or (idinsignia is null and nomeinsignia is null)),
     constraint ak_idinsignia unique (idinsignia)
 );
 
@@ -70,7 +70,7 @@ create table pokemon
     especie varchar(45) not null,
     datacaptura date default (sysdate()), 
     localcaptura varchar(45) not null,
-    pokebola varchar(45) default 'Normal' not null,
+    pokebola varchar(45) not null,
     sexo char(1),
     apelido varchar(45),
     constraint pk_pokemon primary key (idpokemon),
@@ -92,11 +92,12 @@ create table golpe
     fk_idtipo int not null,
     idgolpe int not null,
     nome varchar(45) not null,
-    poder int not null,
-    precisao decimal(4,1) not null,
+    poder int default (40),
+    precisao decimal(4,1) default (90.0),
     constraint fk_idtipo foreign key (fk_idtipo) references tipo (idtipo),
     constraint pk_idgolpe primary key (idgolpe),
-    constraint chk_precisao check (0 < precisao <= 100) /* 0 < precisao <= 100 */
+    constraint chk_poder check (0 < poder < 999),
+    constraint chk_precisao check (0.1 < precisao <= 100) /* 0 < precisao <= 100 */
 );
 
 create table pokemon_possui_tipo
@@ -181,10 +182,14 @@ insert into pokemon values (135, 10, "Jolteon", "2000-06-20", "Ilha Cinnabar", "
 insert into pokemon values (13, 13, "Butterfree", "2022-11-14", "Rota 1", "Pokeball", "m", "Brobuleta");
 insert into pokemon values (3, 10, "Charmander", "2022-12-5", "Ilha Cinnabar", "Pokeball", "f", "Charmie");
 insert into pokemon values (4, 13, "Charmeleon", "2022-9-9", "Ilha Cinnabar", "Great ball", "m", "Leonidas");
-insert into pokemon values (5, 11, "Charizard", "2022-4-4", "Ilha Cinnabar", "Ultraball", "m", "Zagreu");
+insert into pokemon values (5, 11, "Machoke", "2022-4-4", "Rota 7", "Ultraball", "m", "Edem.B");
+insert into pokemon values (77, 11, "Crobat", "2022-3-12", "Mt. Moon", "Dusk ball", "m", "Batleo");
+
 
 /* Inserção de dados na tabela Pokemon possui tipo: (fk_tipo,fk_idpokemon) */
-insert into pokemon_possui_tipo values(10,1);
+insert into pokemon_possui_tipo values(13,1);
+insert into pokemon_possui_tipo values(3,2);
+insert into pokemon_possui_tipo values(1,2);
 insert into pokemon_possui_tipo values(3,12);
 insert into pokemon_possui_tipo values(7,12);
 insert into pokemon_possui_tipo values(8,94);
@@ -192,14 +197,17 @@ insert into pokemon_possui_tipo values(4,94);
 insert into pokemon_possui_tipo values(11,121);
 insert into pokemon_possui_tipo values(14,121);
 insert into pokemon_possui_tipo values(13,135);
+insert into pokemon_possui_tipo values(3,13);
+insert into pokemon_possui_tipo values(7,13);
 insert into pokemon_possui_tipo values(10,3);
 insert into pokemon_possui_tipo values(10,4);
-insert into pokemon_possui_tipo values(10,5);
-insert into pokemon_possui_tipo values(3,5);
+insert into pokemon_possui_tipo values(2,5);
+insert into pokemon_possui_tipo values(3,77);
+insert into pokemon_possui_tipo values(4,77);
 
 /* Inserção de dados na tabela Golpe: (fk_idtipo, idgolpe, nome, poder, precisao) */
 insert into golpe values(1, 1, "Investida", 35, 95.0);
-insert into golpe values(2, 5, "Fly", 90, 95.0);
+insert into golpe values(3, 5, "Fly", 90, 95.0);
 insert into golpe values(5, 2, "Dig", 80, 100.0);
 insert into golpe values(5, 3, "Ataque de Areia", 0, 100.0);
 insert into golpe values(10, 6, "Lança Chamas", 90, 100.0);
@@ -207,6 +215,7 @@ insert into golpe values(5, 4, "Terremoto", 100, 100.0);
 insert into golpe values(10, 7, "Soco de fogo", 75, 100.0);
 insert into golpe values(13, 8, "Canhão Zap", 120, 100.0);
 insert into golpe values(17, 9, "Mordida", 60, 100.0);
+insert into golpe values(3, 10, "Ás Aéreo", 90, 95.0);
 
 /* Exibir a tabela desafio com os nomes do líder desafiado e treinador desafiante, ordenados pelo líder */
 select d.iddesafio as ID, l.nome as Líder, t.nome as Treinador, d.dia as Dia, d.mes as Mês, d.ano as Ano, d.nomeinsignia as Insígnia
@@ -221,28 +230,22 @@ from treinador
 where year(datanascimento)
 between 1980 and 2005;
 
-/* Exibir o nome do tipo de pokémon cuja média do poder de golpe esteja entre 70.0 e 100.0 */
-/*
-select t.nome as "Tipo", avg(g.poder) as "Poder médio"
-from tipo t
-join golpe g on g.fk_idtipo = t.idtipo
-where "Poder médio" between 70.0 and 100.0
-group by t.idtipo; */
-
+/* Exibir o nome dos tipos de pokémon cujas médias do poderes de golpe esteja entre 70.0 e 100.0 */
 select t.nome as Tipo, avg(g.poder) as Poder
 from golpe g
 join tipo t on g.fk_idtipo = t.idtipo
 where Poder between 70.0 and 100.0
 group by t.idtipo;
 
-/*  Exibir o nome do tipo e a espécie do pokémon correspondente da tabela pokemon_possui_tipo */
-select t.nome as Tipo, p.especie as Pokémon 
+/*  Exibir o id, nome do tipo e a espécie do pokémon correspondente da tabela pokemon_possui_tipo */
+select p.idpokemon, t.nome as Tipo, p.especie as Pokémon 
 from pokemon_possui_tipo pt 
 join tipo t on pt.fk_tipo = t.idtipo
-join pokemon p on pt.fk_idpokemon = p.idpokemon;
+join pokemon p on pt.fk_idpokemon = p.idpokemon
+order by p.idpokemon;
 
 /* Exibir pokemons que começam com 'Char' */
-select * from pokemon
+select * from Pokemon
 having especie like 'Char%';
 
 /* Exibir a quantidade de tipos de cada pokemon e seus apelidos */
@@ -251,10 +254,11 @@ from pokemon p
 join pokemon_possui_tipo pt on p.idpokemon = pt.fk_idpokemon
 group by p.idpokemon;
 
-/* Exibir poder do golpe mais forte do tipo lutador */
-select max(poder) AS "Mais forte"
+/* Exibir poder do golpe mais forte do tipo Voador */
+select nome, max(poder) AS "Mais forte"
 from golpe
-where fk_idtipo = 2;
+where fk_idtipo = 3
+group by nome;
 
 /* Exibir todos os pokemons que possuem apelidos */
 select idpokemon, especie, apelido from pokemon
